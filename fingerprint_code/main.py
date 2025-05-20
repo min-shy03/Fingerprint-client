@@ -10,7 +10,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 class FingerprintUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        loadUi("fingerprint_gui.ui", self)  # Qt Designer로 만든 .ui 파일을 불러옴
+        loadUi("fingerprint_code/fingerprint_gui.ui", self)  # Qt Designer로 만든 .ui 파일을 불러옴
         self.show()
         
         # 타이머 세팅
@@ -37,17 +37,23 @@ class FingerprintUI(QMainWindow):
         self.gym_button.clicked.connect(self.outside_reason_gym)
         self.etc_button.clicked.connect(self.outside_reason_etc)
         
-        # 학번 입력 버튼
-        self.zero_button.clicked.connect(lambda: self.on_digit_button_clicked("0"))
-        self.one_button.clicked.connect(lambda: self.on_digit_button_clicked("1"))
-        self.two_button.clicked.connect(lambda: self.on_digit_button_clicked("2"))
-        self.three_button.clicked.connect(lambda: self.on_digit_button_clicked("3"))
-        self.four_button.clicked.connect(lambda: self.on_digit_button_clicked("4"))
-        self.five_button.clicked.connect(lambda: self.on_digit_button_clicked("5"))
-        self.six_button.clicked.connect(lambda: self.on_digit_button_clicked("6"))
-        self.seven_button.clicked.connect(lambda: self.on_digit_button_clicked("7"))
-        self.eight_button.clicked.connect(lambda: self.on_digit_button_clicked("8"))
-        self.nine_button.clicked.connect(lambda: self.on_digit_button_clicked("9"))
+        # 코파일럿 수정 버전 학번 입력 버튼 딕셔너리화
+        digit_buttons = {
+            self.zero_button: "0",
+            self.one_button: "1",
+            self.two_button: "2",
+            self.three_button: "3",
+            self.four_button: "4",
+            self.five_button: "5",
+            self.six_button: "6",
+            self.seven_button: "7",
+            self.eight_button: "8",
+            self.nine_button: "9",
+        }
+        
+        for button, digit in digit_buttons.items():
+            button.clicked.connect(lambda _, d=digit: self.on_digit_button_clicked(d))
+        
         self.backspace_button.clicked.connect(self.on_delete_clicked)
         self.enter_button.clicked.connect(self.on_enter_button_clicked)
         
