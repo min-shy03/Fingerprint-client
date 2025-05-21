@@ -19,7 +19,7 @@ class FingerprintUI(QMainWindow):
         self.timer.start(1000)  # 1000ms = 1초
         self.update_time()
         
-        # 등교, 하교, 외출 복귀 시 같은 페이지로 이동하지만 페이지는 같음으로 구분하는 변수
+        # 등교, 하교, 외출, 복귀 시 같은 페이지로 이동하지만 페이지는 같음으로 구분하는 변수
         self.current_action = None
         
         # 각 화면 변경 코드
