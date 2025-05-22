@@ -397,6 +397,112 @@ border: 1px solid white;</string>
       </property>
      </widget>
     </widget>
+    <widget class="QWidget" name="page_last_member">
+     <widget class="QLabel" name="last_msg_label">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>100</y>
+        <width>811</width>
+        <height>130</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>AppleSDGothicNeoB00</family>
+        <pointsize>30</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(30, 34, 40);
+color: white;
+border: 1px solid white;</string>
+      </property>
+      <property name="text">
+       <string>마지막 퇴실자인가요?</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QWidget" name="layoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>270</y>
+        <width>776</width>
+        <height>141</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="spacing">
+        <number>20</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="yes_button">
+         <property name="minimumSize">
+          <size>
+           <width>120</width>
+           <height>120</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>120</width>
+           <height>120</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>AppleSDGothicNeoB00</family>
+           <pointsize>30</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(30, 34, 40);
+color: white;
+border: 1px solid white;
+border-radius: 15px;</string>
+         </property>
+         <property name="text">
+          <string>네</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="no_button">
+         <property name="minimumSize">
+          <size>
+           <width>120</width>
+           <height>120</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>120</width>
+           <height>120</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>AppleSDGothicNeoB00</family>
+           <pointsize>30</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(30, 34, 40);
+color: white;
+border: 1px solid white;
+border-radius: 15px;</string>
+         </property>
+         <property name="text">
+          <string>아니요</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
     <widget class="QWidget" name="page_fingerprint">
      <widget class="QLabel" name="fingerprint_msg_label">
       <property name="geometry">

@@ -24,7 +24,7 @@ class FingerprintUI(QMainWindow):
         
         # 각 화면 변경 코드
         self.move_enter_page_button.clicked.connect(lambda: self.on_action_selected("등교", self.page_fingerprint))
-        self.move_leave_page_button.clicked.connect(lambda: self.on_action_selected("하교", self.page_fingerprint))
+        self.move_leave_page_button.clicked.connect(lambda: self.on_action_selected("하교", self.page_last_member))
         self.move_return_page_button.clicked.connect(lambda: self.on_action_selected("복귀", self.page_fingerprint))
         self.move_outside_page_button.clicked.connect(lambda: self.on_action_selected("외출", self.page_outside))
         self.move_registration_page_button.clicked.connect(self.on_register_clicked)
@@ -34,6 +34,10 @@ class FingerprintUI(QMainWindow):
         self.gs25_button.clicked.connect(lambda: self.on_action_selected("편의점", self.page_fingerprint))
         self.gym_button.clicked.connect(lambda: self.on_action_selected("운동", self.page_fingerprint))
         self.etc_button.clicked.connect(lambda: self.on_action_selected("기타", self.page_fingerprint))
+        
+        # 마지막 인원 체크 버튼 클릭 후 실행 코드
+        self.yes_button.clicked.connect(lambda: self.on_action_selected("문닫기", self.page_fingerprint))
+        self.no_button.clicked.connect(lambda: self.on_action_selected("하교", self.page_fingerprint))
         
         # 메인화면 복귀 코드
         self.back_main_button.clicked.connect(self.on_back_main_clicked)
@@ -104,26 +108,34 @@ class FingerprintUI(QMainWindow):
     # 서버 응답 결과 
     def on_worker_finished(self, result):
         self.registration_msg_label.setText(result)
+        
+    
 
 # 서버 요청 담당 클래스
 class FingerprintWorker(QThread):
     finished = pyqtSignal(str)  # 결과 메시지 전달용 시그널
 
-    def __init__(self, student_id, action):
+    def __init__(self, student_id, action, is_close=False):
         super().__init__()
         self.student_id = student_id
         self.action = action
+        self.is_close = is_close  # <- 마지막 인원인지 여부
         
     def run(self):
         try:
-            # api 형식
-            data = {
-                "std_num": self.student_id,
-                "action": self.action
-            }
-            
-            # 서버에 요청 보내기
-            res = requests.post("http://210.101.236.158:8081/api/fingerprint/logs", json=data)
+            if self.is_close:
+                # 마지막 인원 API
+                data = { "closingMember": self.student_id }
+                url = "http://210.101.236.158:8081/api/fingerprint/close"
+            else:
+                # 일반 출결 API
+                data = {
+                    "std_num": self.student_id,
+                    "action": self.action
+                }
+                url = "http://210.101.236.158:8081/api/fingerprint/logs"
+
+            res = requests.post(url, json=data)
 
             if res.status_code == 200:
                 self.finished.emit("서버 응답: 성공")
