@@ -531,6 +531,43 @@ border: 1px solid white;</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
+     <widget class="QPushButton" name="mock_test_button">
+      <property name="geometry">
+       <rect>
+        <x>345</x>
+        <y>285</y>
+        <width>120</width>
+        <height>120</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>120</width>
+        <height>120</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>120</width>
+        <height>120</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>AppleSDGothicNeoB00</family>
+        <pointsize>30</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(30, 34, 40);
+color: white;
+border: 1px solid white;
+border-radius: 15px;</string>
+      </property>
+      <property name="text">
+       <string>테스트</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_registration">
      <widget class="QWidget" name="gridLayoutWidget">

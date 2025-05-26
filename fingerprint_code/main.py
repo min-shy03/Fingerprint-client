@@ -3,8 +3,11 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.uic import loadUi  # 핵심: .ui 파일을 직접 불러옴
 from PyQt5.QtCore import QTimer, QTime
 from PyQt5.QtCore import QDateTime
-import requests
 from PyQt5.QtCore import QThread, pyqtSignal
+import requests
+import json
+
+
 
 # UI 담당 클래스
 class FingerprintUI(QMainWindow):
@@ -12,6 +15,7 @@ class FingerprintUI(QMainWindow):
         super().__init__()
         loadUi("fingerprint_code/fingerprint_gui.ui", self)  # Qt Designer로 만든 .ui 파일을 불러옴
         self.show()
+        self.threads = []
         
         # 타이머 세팅
         self.timer = QTimer(self)
@@ -63,6 +67,10 @@ class FingerprintUI(QMainWindow):
         self.backspace_button.clicked.connect(self.on_delete_clicked)
         self.enter_button.clicked.connect(self.on_enter_button_clicked)
         
+        # 목 데이터 테스트 버튼 함수
+        self.mock_test_button.clicked.connect(self.process_fingerprint_action)
+        
+        
     
     # 현재 시각을 업데이트 함수
     def update_time(self):
@@ -72,6 +80,8 @@ class FingerprintUI(QMainWindow):
     # 메인 화면으로 돌아가기 버튼 함수
     def on_back_main_clicked(self) :
         self.stackedWidget.setCurrentWidget(self.page_main)
+        
+        self.fingerprint_msg_label.setText("지문을 입력하세요")
         
     # 지문 등록 버튼 함수
     def on_register_clicked(self):
@@ -100,14 +110,44 @@ class FingerprintUI(QMainWindow):
         self.student_id = updated
     
     # 엔터 버튼 함수
-    def on_enter_button_clicked(self) : 
-        self.worker = FingerprintWorker(self.student_id, self.current_action)
+    def on_enter_button_clicked(self):
+    # 등록일 때만 입력값을 사용
+        if self.current_action == "등록":
+            student_id = self.student_id
+            use_mock = False
+        else:
+            student_id = None  # 입력받지 않음
+            use_mock = True    # mock 지문 사용
+
+        self.worker = FingerprintWorker(
+            student_id=student_id,
+            action=self.current_action,
+            is_close=(self.current_action == "문닫기"),
+            use_mock=use_mock
+        )
         self.worker.finished.connect(self.on_worker_finished)
         self.worker.start()
+        self.threads.append(self.worker)
+    
+    def process_fingerprint_action(self):
+        if self.current_action == "등록":
+            return  # 등록은 기존 엔터 버튼 사용
+
+        self.worker = FingerprintWorker(
+            action=self.current_action,
+            is_close=(self.current_action == "문닫기"),
+            use_mock=True
+        )
+        self.worker.finished.connect(self.on_worker_finished)
+        self.worker.start()
+        self.threads.append(self.worker)
     
     # 서버 응답 결과 
     def on_worker_finished(self, result):
-        self.registration_msg_label.setText(result)
+        if self.current_action == "등록":
+            self.registration_msg_label.setText(result)
+        else:
+            self.fingerprint_msg_label.setText(result)
         
     
 
@@ -115,32 +155,68 @@ class FingerprintUI(QMainWindow):
 class FingerprintWorker(QThread):
     finished = pyqtSignal(str)  # 결과 메시지 전달용 시그널
 
-    def __init__(self, student_id, action, is_close=False):
+    def __init__(self, student_id=None, action=None, is_close=False, use_mock=False):
         super().__init__()
         self.student_id = student_id
         self.action = action
-        self.is_close = is_close  # <- 마지막 인원인지 여부
+        self.is_close = is_close        # 마지막 인원 체크 
+        self.use_mock = use_mock        # 지문 목 데이터 사용 여부
+        
+    def get_mock_student_id(self):
+        try:
+            with open("selected_fingerprint.json", "r", encoding="utf-8") as f:
+                selected_fp_id = json.load(f)["fingerprint_id"]
+
+            with open("mock_fingerprint_db.json", "r", encoding="utf-8") as f:
+                db = json.load(f)
+
+            return db.get(selected_fp_id)
+        except Exception as e:
+            print("목 데이터 로딩 오류 :", e)
+            return None
         
     def run(self):
         try:
-            if self.is_close:
-                # 마지막 인원 API
-                data = { "closingMember": self.student_id }
+            # mock 데이터에서 학번 가져오기
+            if self.use_mock:
+                self.student_id = self.get_mock_student_id()
+
+            if not self.student_id:
+                self.finished.emit("⚠️ 지문 인식 실패 (mock)")
+                return
+
+            if self.action == "등록":
+                url = "http://210.101.236.158:8081/api/fingerprint/students"
+                data = {
+                    "std_num": self.student_id,
+                    "fingerprint1": "mock_fingerprint_1",
+                    "fingerprint2": "mock_fingerprint_2"
+                }
+            elif self.is_close:
                 url = "http://210.101.236.158:8081/api/fingerprint/close"
+                data = { "closingMember": self.student_id }
             else:
-                # 일반 출결 API
+                url = "http://210.101.236.158:8081/api/fingerprint/logs"
                 data = {
                     "std_num": self.student_id,
                     "action": self.action
                 }
-                url = "http://210.101.236.158:8081/api/fingerprint/logs"
 
+            print("[DEBUG] 등록 요청 data:", data)
+            print("[DEBUG] POST to:", url)
+            
             res = requests.post(url, json=data)
 
             if res.status_code == 200:
-                self.finished.emit("서버 응답: 성공")
+                try:
+                    json_result = res.json()
+                    message = json_result.get("message", "응답 메시지 없음")
+                    self.finished.emit(message)
+                except Exception as e:
+                    self.finished.emit(f"[응답 디코딩 실패] {res.text}")
             else:
                 self.finished.emit(f"서버 오류: {res.status_code}")
+
         except Exception as e:
             self.finished.emit(f"예외 발생: {str(e)}")
         
