@@ -7,8 +7,6 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import requests
 import json
 
-
-
 # UI 담당 클래스
 class FingerprintUI(QMainWindow):
     def __init__(self):
@@ -201,7 +199,7 @@ class FingerprintWorker(QThread):
                     "std_num": self.student_id,
                     "action": self.action
                 }
-
+            
             print("[DEBUG] 등록 요청 data:", data)
             print("[DEBUG] POST to:", url)
             
@@ -215,8 +213,14 @@ class FingerprintWorker(QThread):
                 except Exception as e:
                     self.finished.emit(f"[응답 디코딩 실패] {res.text}")
             else:
-                self.finished.emit(f"서버 오류: {res.status_code}")
-
+                try:
+                    # 서버가 보낸 JSON에서 message 추출
+                    error_message = res.json().get("message", "알 수 없는 오류입니다.")
+                    self.finished.emit(f"오류: {error_message}")
+                except Exception:
+                    # JSON 파싱 실패 시 fallback
+                    self.finished.emit(f"서버 오류 (코드: {res.status_code})")
+                    
         except Exception as e:
             self.finished.emit(f"예외 발생: {str(e)}")
         
