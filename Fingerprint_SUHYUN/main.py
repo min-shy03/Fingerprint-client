@@ -11,7 +11,7 @@ import json
 class FingerprintUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        loadUi("fingerprint_code/fingerprint_gui.ui", self)  # Qt Designer로 만든 .ui 파일을 불러옴
+        loadUi("Fingerprint_SUHYUN/fingerprint_gui.ui", self)  # Qt Designer로 만든 .ui 파일을 불러옴
         self.show()
         self.threads = []
         
@@ -162,10 +162,10 @@ class FingerprintWorker(QThread):
         
     def get_mock_student_id(self):
         try:
-            with open("selected_fingerprint.json", "r", encoding="utf-8") as f:
+            with open("Fingerprint_SUHYUN/selected_fingerprint.json", "r", encoding="utf-8") as f:
                 selected_fp_id = json.load(f)["fingerprint_id"]
 
-            with open("mock_fingerprint_db.json", "r", encoding="utf-8") as f:
+            with open("Fingerprint_SUHYUN/mock_fingerprint_db.json", "r", encoding="utf-8") as f:
                 db = json.load(f)
 
             return db.get(selected_fp_id)
