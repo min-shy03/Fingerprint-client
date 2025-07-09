@@ -5,6 +5,7 @@ from PyQt5.QtCore import QTimer, QTime
 from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QKeyEvent
+from Fingerprint_SUHYUN.sensor import register_fingerprint
 import requests
 import json
 

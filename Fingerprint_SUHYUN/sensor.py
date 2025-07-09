@@ -47,7 +47,7 @@ def decode_and_decrypt(encoded_data_b64: str, key: bytes) -> bytes :
 def encode_and_encrypt(sensor, buffer_id: int, key: bytes) -> str:
     fingerprint_data = bytes(sensor.downloadCharacteristics(buffer_id))
     encrypted = encrypt(fingerprint_data, key)
-    return base64.b64encode(encrypted).decode(), fingerprint_data
+    return base64.b64encode(encrypted).decode()
 
 # 🔄 지문 등록 전체 처리
 def register_fingerprint():
@@ -85,25 +85,14 @@ def register_fingerprint():
     key = generate_key(password, salt)
     
     # 4. 지문 암호화 (같은 키로 둘 다)
-    fp_data1, original_fp1 = encode_and_encrypt(sensor, 0x01, key)
-    fp_data2, original_fp2 = encode_and_encrypt(sensor, 0x02, key)
+    fp_data1 = encode_and_encrypt(sensor, 0x01, key)
+    fp_data2 = encode_and_encrypt(sensor, 0x02, key)
     salt_b64 = base64.b64encode(salt).decode("utf-8")
 
     sensor.createTemplate()
     sensor.storeTemplate()
-    
-    decrypted_fp1 = decode_and_decrypt(fp_data1,key)
-    decrypted_fp2 = decode_and_decrypt(fp_data2,key)
 
-    print("원본 fp1 길이 :", len(original_fp1))
-    print("복호화 된 fp1 길이 :", len(decrypted_fp1))
-    print("두 값이 같은가?", original_fp1 == decrypted_fp1)
-
-    print("원본 fp2 길이 :", len(original_fp2))
-    print("복호화 된 fp2 길이 :", len(decrypted_fp2))
-    print("두 값이 같은가?", original_fp2 == decrypted_fp2)
-
-    print("지문 등록 완료")
+    print("지문 등록을 완료하였습니다.")
     
 if __name__ == "__main__":
     register_fingerprint()
