@@ -2,8 +2,9 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.uic import loadUi  # 핵심: .ui 파일을 직접 불러옴
 from PyQt5.QtCore import QTimer, QTime
-from PyQt5.QtCore import QDateTime
+from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtGui import QKeyEvent
 import requests
 import json
 
@@ -13,6 +14,7 @@ class FingerprintUI(QMainWindow):
         super().__init__()
         loadUi("Fingerprint_SUHYUN/fingerprint_gui.ui", self)  # Qt Designer로 만든 .ui 파일을 불러옴
         self.show()
+        self.showFullScreen()
         self.threads = []
         
         # 타이머 세팅
@@ -69,6 +71,9 @@ class FingerprintUI(QMainWindow):
         self.mock_test_button.clicked.connect(self.process_fingerprint_action)
         
         
+    def keyPressEvent(self, event):  # ESC 키보드 핸들러 추가
+        if event.key() == Qt.Key_Escape:
+            self.close()
     
     # 현재 시각을 업데이트 함수
     def update_time(self):
