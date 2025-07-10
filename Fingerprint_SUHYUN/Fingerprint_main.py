@@ -5,9 +5,12 @@ from PyQt5.QtCore import QTimer, QTime
 from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QKeyEvent
-from Fingerprint_SUHYUN.sensor import register_fingerprint
+from Fingerprint_SUHYUN.Fingerprint_sensor import FingerprintManager
+from Fingerprint_SUHYUN.Fingerprint_api import register_fingerprint_api,log_status_api,close_door_api
 import requests
 import json
+
+manager = FingerprintManager()
 
 # UI 담당 클래스
 class FingerprintUI(QMainWindow):
@@ -17,6 +20,7 @@ class FingerprintUI(QMainWindow):
         self.show()
         self.showFullScreen()
         self.threads = []
+        manager.message.connect(self.on_message_received)
         
         # 타이머 세팅
         self.timer = QTimer(self)
@@ -71,6 +75,9 @@ class FingerprintUI(QMainWindow):
         # 목 데이터 테스트 버튼 함수
         self.mock_test_button.clicked.connect(self.process_fingerprint_action)
         
+    
+    def on_message_received(self, msg):
+        self.registration_msg_label.setText(msg)
         
     def keyPressEvent(self, event):  # ESC 키보드 핸들러 추가
         if event.key() == Qt.Key_Escape:
@@ -158,7 +165,7 @@ class FingerprintUI(QMainWindow):
 # 서버 요청 담당 클래스
 class FingerprintWorker(QThread):
     finished = pyqtSignal(str)  # 결과 메시지 전달용 시그널
-
+    
     def __init__(self, student_id=None, action=None, is_close=False, use_mock=False):
         super().__init__()
         self.student_id = student_id
@@ -166,67 +173,18 @@ class FingerprintWorker(QThread):
         self.is_close = is_close        # 마지막 인원 체크 
         self.use_mock = use_mock        # 지문 목 데이터 사용 여부
         
-    def get_mock_student_id(self):
-        try:
-            with open("Fingerprint_SUHYUN/selected_fingerprint.json", "r", encoding="utf-8") as f:
-                selected_fp_id = json.load(f)["fingerprint_id"]
-
-            with open("Fingerprint_SUHYUN/mock_fingerprint_db.json", "r", encoding="utf-8") as f:
-                db = json.load(f)
-
-            return db.get(selected_fp_id)
-        except Exception as e:
-            print("목 데이터 로딩 오류 :", e)
-            return None
-        
     def run(self):
         try:
-            # mock 데이터에서 학번 가져오기
-            if self.use_mock:
-                self.student_id = self.get_mock_student_id()
-
-            if not self.student_id:
-                self.finished.emit("⚠️ 지문 인식 실패 (mock)")
-                return
-
             if self.action == "등록":
-                url = "http://210.101.236.158:8081/api/fingerprint/students"
-                data = {
-                    "std_num": self.student_id,
-                    "fingerprint1": "mock_fingerprint_1",
-                    "fingerprint2": "mock_fingerprint_2"
-                }
-            elif self.is_close:
-                url = "http://210.101.236.158:8081/api/fingerprint/close"
-                data = { "closingMember": self.student_id }
+                if not self.student_id:
+                    self.finished.emit("학번이 없습니다.")
+                    return
+                # 학번은 이미 self.student_id에 저장됨
+                manager.register_fingerprint(self.student_id)
             else:
-                url = "http://210.101.236.158:8081/api/fingerprint/logs"
-                data = {
-                    "std_num": self.student_id,
-                    "action": self.action
-                }
-            
-            print("[DEBUG] 등록 요청 data:", data)
-            print("[DEBUG] POST to:", url)
-            
-            res = requests.post(url, json=data)
-
-            if res.status_code == 200:
-                try:
-                    json_result = res.json()
-                    message = json_result.get("message", "응답 메시지 없음")
-                    self.finished.emit(message)
-                except Exception as e:
-                    self.finished.emit(f"[응답 디코딩 실패] {res.text}")
-            else:
-                try:
-                    # 서버가 보낸 JSON에서 message 추출
-                    error_message = res.json().get("message", "알 수 없는 오류입니다.")
-                    self.finished.emit(f"오류: {error_message}")
-                except Exception:
-                    # JSON 파싱 실패 시 fallback
-                    self.finished.emit(f"서버 오류 (코드: {res.status_code})")
-                    
+                # 등록이 아니라면 학번을 지문으로 추출
+                manager.verify_fingerprint(self.action)
+                
         except Exception as e:
             self.finished.emit(f"예외 발생: {str(e)}")
         
