@@ -88,14 +88,18 @@ def send_post(res) :
     """공통 POST 요청 처리 함수"""
     try:
         res_data = res.json()
-        if res.status_code == 200:
-            json_result = res.json()
-            return json_result.get("success", False), json_result.get("message", "성공")
-        else:
+        if res.status_code == 200 or res.status_code == 400 :
+            print(res_data["message"])
+            return res_data["success"]
+        elif res.status_code == 404 :
             # 실패 시 서버 메시지 반환
-            try:
-                return False, res.json().get("message", f"서버 오류 {res.status_code}")
-            except:
-                return False, f"서버 오류 (코드: {res.status_code})"
+            print("404, 엔드포인트를 찾을 수 없습니다.")
+            return False
+    except KeyError as e :
+        print("응답 형식이 올바르지 않습니다.")
+        return False
+    
     except Exception as e:
-        return False, f"요청 실패: {str(e)}"
+        print(f"오류 발생 {str(e)}")
+        return False
+        
