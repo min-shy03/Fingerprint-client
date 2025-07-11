@@ -9,6 +9,9 @@ from cryptography.hazmat.backends import default_backend
 from pyfingerprint.pyfingerprint import PyFingerprint
 from Fingerprint_api import get_all_fingerprint_data, register_fingerprint_api, close_door_api, log_status_api
 from PyQt5.QtCore import QThread, pyqtSignal
+from dotenv import load_dotenv
+
+load_dotenv()
 
 MATCH_THRESHOLD = 50
 
@@ -73,7 +76,7 @@ class FingerprintManager(QThread):
     
     # 서버로부터 지문 데이터 받아오기
     def get_finger_list(self):
-        self.sensor.clearDatabase()
+        # self.sensor.clearDatabase()
         self.STUDENT_LIST.clear()
         data_list = get_all_fingerprint_data()
 

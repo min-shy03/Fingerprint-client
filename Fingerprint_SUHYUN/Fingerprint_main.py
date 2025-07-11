@@ -5,8 +5,8 @@ from PyQt5.QtCore import QTimer, QTime
 from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QKeyEvent
-from Fingerprint_SUHYUN.Fingerprint_sensor import FingerprintManager
-from Fingerprint_SUHYUN.Fingerprint_api import register_fingerprint_api,log_status_api,close_door_api
+from Fingerprint_sensor import FingerprintManager
+from Fingerprint_api import register_fingerprint_api,log_status_api,close_door_api
 import requests
 import json
 
