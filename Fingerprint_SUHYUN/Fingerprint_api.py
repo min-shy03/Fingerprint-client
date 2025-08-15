@@ -1,105 +1,68 @@
 import requests
+import os
+import sys
+from PyQt5.QtCore import QObject, pyqtSignal
 
-# 서버 주소 및 인증키 (임시값, 나중에 .env에서 불러오게 가능)
+# 테스트용 전역 변수 (실사용 시 환경 변수에 저장)
 SERVER_URL = "http://210.101.236.158:8081/api/fingerprint"
 SERVER_KEY = "dev"
 
-HEADERS = {
-    "Authorization": f"Bearer {SERVER_KEY}"
-}
+# 메세지 화면에 출력하는 용도 클래스
+class APImessage(QObject) :
+    message = pyqtSignal(str)
 
-def get_all_fingerprint_data() :
-    """서버에서 모든 지문 데이터를 가져옴"""
-    url = f"{SERVER_URL}/students"
-    
-    try:
-        res = requests.get(url, headers=HEADERS)
-        
-        if send_post(res) :
-            return res.json().get("data", [])
-        else:
+api_message = APImessage()
+
+# 환경 변수 초기화
+def init_api() :
+    global SERVER_URL
+    global SERVER_KEY
+
+    try :
+        SERVER_URL = os.getenv("FP_URL")
+        SERVER_KEY = os.getenv("FP_KEY")
+
+        if SERVER_URL is None :
+            raise ValueError("FP_URL 환경 변수 설정되지 않음.")
+        if SERVER_KEY is None :
+            raise ValueError("FP_KEY 환경 변수 설정되지 않음.")
+    except Exception as e :
+        print(e)
+        sys.exit(1)
+
+# 서버에 있는 지문 데이터 가져오는 API
+def get_all_fingerprint() :
+    try :
+        responce = requests.get(f"{SERVER_URL}/students")
+
+        # 서버 요청 성공 시 학번, 지문 데이터, salt 정보 리턴 실패 시 빈 리스트 리턴
+        if api_success_check(responce) :
+            return responce.json()["data"]
+        else :
             return []
     except requests.exceptions as e :
-        print(f"요청 과정에서 오류 발생 (코드: {e})")
+        api_message.message.emit(f"요청 과정 중 오류 발생\n{str(e)}")
         return []
-    except Exception as e:
-        print(f"지문 정보 조회 중 오류 발생 {str(e)}")
+    except Exception as e :
+        api_message.message.emit(f"지문 정보 조회 중 오류 발생\n{str(e)}")
         return []
 
-def register_fingerprint_api(std_num, fp1, fp2, salt):
-    """지문 등록 API"""
+def api_success_check(responce) :
+    # api 요청이 성공인지 실패인지 결과를 반환하는 함수
     try :
-        url = f"{SERVER_URL}/students"
-        data = {
-            "std_num": std_num,
-            "fingerprint1": fp1,
-            "fingerprint2": fp2,
-            "salt": salt
-        }
-        
-        res = requests.post(url, headers=HEADERS, json=data)
-        return send_post(res)
-    except Exception as e :
-        print(f"지문 등록 중 오류 발생 {str(e)}")
-        return False
+        # responce의 결과값이 딕셔너리 형태로 대입됨
+        responce_data = responce.json()
 
-# 가입 가능한 학번인지 검증
-def check_register(std_num):
-    url = f"{SERVER_URL}/students/{std_num}"
-    try :
-        res = requests.get(url, headers=HEADERS)
-        return send_post(res)
-    except Exception as e :
-        print(f"학번 검증 중 오류 발생 {str(e)}")
-        return False
-
-def log_status_api(std_num, action):
-    """출결 로그 전송 API"""
-    try :
-        url = f"{SERVER_URL}/logs"
-        data = {
-            "std_num": std_num,
-            "action": action
-        }
-        
-        res = requests.post(url, headers=HEADERS, json=data)
-        return send_post(res)
-    except Exception as e :
-        print(f"로그 기록 중 오류 발생 {str(e)}")
-        return False
-
-
-def close_door_api(std_num):
-    """마지막 인원 문닫기 API"""
-    try :
-        url = f"{SERVER_URL}/close"
-        data = {
-            "closingMember": std_num
-        }
-        
-        res = requests.post(url, headers=HEADERS, json=data)
-        return send_post(res)
-    except Exception as e :
-        print(f"문닫기 중 오류 발생 {str(e)}")
-        return False
-
-
-def send_post(res) :
-    """공통 POST 요청 처리 함수"""
-    try:
-        res_data = res.json()
-        if res.status_code == 200 or res.status_code == 400 :
-            print(res_data["message"])
-            return res_data["success"]
-        elif res.status_code == 404 :
-            # 실패 시 서버 메시지 반환
-            print("404, 엔드포인트를 찾을 수 없습니다.")
+        # 서버에 요청 성공 시
+        if responce.status_code == 200 or responce.status_code == 400 :
+            api_message.message.emit(responce_data["message"])
+            return responce_data["success"]
+        elif responce.status_code == 404 :
+            api_message.message.emit("404, 엔드포인트를 찾을 수 없습니다.")
             return False
     except KeyError as e :
-        print("응답 형식이 올바르지 않습니다.")
+        api_message.message.emit("응답 형식이 올바르지 않습니다.")
         return False
-    
-    except Exception as e:
-        print(f"오류 발생 {str(e)}")
+    except Exception as e :
+        api_message.message.emit(f"오류 발생\n{str(e)}")
         return False
-        

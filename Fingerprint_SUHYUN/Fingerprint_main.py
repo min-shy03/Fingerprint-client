@@ -5,12 +5,8 @@ from PyQt5.QtCore import QTimer, QTime
 from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QKeyEvent
-from Fingerprint_sensor import FingerprintManager
-from Fingerprint_api import register_fingerprint_api,log_status_api,close_door_api
 import requests
 import json
-
-manager = FingerprintManager()
 
 # UI 담당 클래스
 class FingerprintUI(QMainWindow):
@@ -20,7 +16,6 @@ class FingerprintUI(QMainWindow):
         self.show()
         self.showFullScreen()
         self.threads = []
-        manager.message.connect(self.on_message_received)
         
         # 타이머 세팅
         self.timer = QTimer(self)
@@ -47,9 +42,16 @@ class FingerprintUI(QMainWindow):
         # 마지막 인원 체크 버튼 클릭 후 실행 코드
         self.yes_button.clicked.connect(lambda: self.on_action_selected("문닫기", self.page_fingerprint))
         self.no_button.clicked.connect(lambda: self.on_action_selected("하교", self.page_fingerprint))
+
+        # 백스페이스 키와 엔터 키 함수
+        self.backspace_button.clicked.connect(self.on_delete_clicked)
+        self.enter_button.clicked.connect(self.on_enter_button_clicked)
         
         # 메인화면 복귀 코드
         self.back_main_button.clicked.connect(self.on_back_main_clicked)
+
+        # 목 데이터 테스트 버튼 함수
+        self.mock_test_button.clicked.connect(self.process_fingerprint_action)
 
         # 코파일럿 수정 버전 학번 입력 버튼 딕셔너리화
         digit_buttons = {
@@ -67,13 +69,6 @@ class FingerprintUI(QMainWindow):
         
         for button, digit in digit_buttons.items():
             button.clicked.connect(lambda _, d=digit: self.on_digit_button_clicked(d))
-        
-        # 백스페이스 키와 엔터 키 함수
-        self.backspace_button.clicked.connect(self.on_delete_clicked)
-        self.enter_button.clicked.connect(self.on_enter_button_clicked)
-        
-        # 목 데이터 테스트 버튼 함수
-        self.mock_test_button.clicked.connect(self.process_fingerprint_action)
         
     
     def on_message_received(self, msg):
@@ -122,13 +117,8 @@ class FingerprintUI(QMainWindow):
     
     # 엔터 버튼 함수
     def on_enter_button_clicked(self):
-    # 등록일 때만 입력값을 사용
-        if self.current_action == "등록":
-            student_id = self.student_id
-            use_mock = False
-        else:
-            student_id = None  # 입력받지 않음
-            use_mock = True    # mock 지문 사용
+        student_id = self.student_id
+        use_mock = False
 
         self.worker = FingerprintWorker(
             student_id=student_id,
@@ -179,11 +169,8 @@ class FingerprintWorker(QThread):
                 if not self.student_id:
                     self.finished.emit("학번이 없습니다.")
                     return
-                # 학번은 이미 self.student_id에 저장됨
-                manager.register_fingerprint(self.student_id)
-            else:
-                # 등록이 아니라면 학번을 지문으로 추출
-                manager.verify_fingerprint(self.action)
+            else :
+                pass
                 
         except Exception as e:
             self.finished.emit(f"예외 발생: {str(e)}")
