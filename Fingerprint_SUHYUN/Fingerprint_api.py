@@ -13,8 +13,9 @@ class APImessage(QObject) :
 
 api_message = APImessage()
 
-# 환경 변수 초기화
+
 def init_api() :
+    # 환경 변수 초기화
     global SERVER_URL
     global SERVER_KEY
 
@@ -30,8 +31,9 @@ def init_api() :
         print(e)
         sys.exit(1)
 
-# 서버에 있는 지문 데이터 가져오는 API
+
 def get_all_fingerprint() :
+    # 서버에 있는 지문 데이터 가져오는 API
     try :
         responce = requests.get(f"{SERVER_URL}/students")
 

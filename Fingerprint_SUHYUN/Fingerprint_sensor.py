@@ -1,6 +1,11 @@
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
 from PyQt5.QtCore import QThread, pyqtSignal
 import os
 import sys
+from Fingerprint_api import get_all_fingerprint
 
 class FingerprintSensor(QThread) :
     message = pyqtSignal(str)
@@ -34,3 +39,49 @@ class FingerprintSensor(QThread) :
             print("지문 인식기 연결 실패 :", e)
             # 코드가 비정상적으로 끝났음을 알려주는 1 표시
             sys.exit(1)
+
+    # def register_fingerprint(self) :
+
+    
+    def generate_key(self, password, salt):
+        # 암호화 전용 키 생성 함수
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+            backend=default_backend()
+		)
+        return kdf.derive(password)
+    
+    def encrypt(self, data, key) :
+        # 암호화 함수
+        iv = os.urandom(16)
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+        encryptor = cipher.encryptor()
+        encrypted_data = encryptor.update(data) + encryptor.finalize()
+        return iv + encrypted_data
+   
+    def get_fingerprint_list(self) :
+        # 서버 내에서 지문 데이터 가져오는 함수
+
+        # 센서 내의 메모리 초기화
+        self.sensor.clearDatabase()
+        # 학번 담을 리스트 초기화
+        self.STUDENT_LIST.clear()
+
+        # 센서 내의 메모리와 학번 리스트를 초기화 함으로써 같은 인덱스 위치에 각각 지문 데이터와 학번을 저장한다.
+        # ex) 0번 인덱스 조회시 같은 학생의 지문과 학번이 나옴
+
+        # api 호출 데이터 리스트에는 각 학생의 암호화 된 지문 데이터, 학번, salt 값이 딕셔너리 형태로 저장됨
+        data_list = get_all_fingerprint()
+
+        # data에 각각의 학생 정보가 담긴 딕셔너리가 나옴
+        for data in data_list :
+            # 암호화 된 지문 데이터 복호화 
+            fp_data1 = 
+
+
+        
+
+    
