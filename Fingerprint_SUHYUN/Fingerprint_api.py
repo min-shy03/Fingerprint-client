@@ -32,13 +32,13 @@ def init_api() :
         sys.exit(1)
 
 
-def get_all_fingerprint() :
+def get_all_fingerprint_api() :
     # 서버에 있는 지문 데이터 가져오는 API
     try :
         responce = requests.get(f"{SERVER_URL}/students")
 
         # 서버 요청 성공 시 학번, 지문 데이터, salt 정보 리턴 실패 시 빈 리스트 리턴
-        if api_success_check(responce) :
+        if api_success_check_api(responce) :
             return responce.json()["data"]
         else :
             return []
@@ -48,9 +48,26 @@ def get_all_fingerprint() :
     except Exception as e :
         api_message.message.emit(f"지문 정보 조회 중 오류 발생\n{str(e)}")
         return []
+    
+def register_fingerprint_api(fp_data1, fp_data2, std_num, salt) :
+    # 지문 등록 api 호출
+    try :
+        data_json = {
+            "fingerprint1" : fp_data1,
+            "fingerprint2" : fp_data2,
+            "std_num" : std_num,
+            "salt" : salt
+        }
 
-def api_success_check(responce) :
-    # api 요청이 성공인지 실패인지 결과를 반환하는 함수
+        responce = requests.post(f"{SERVER_URL}/students", data=data_json)
+
+        return api_success_check_api(responce)
+    except Exception as e :
+        api_message.message.emit(f"지문 등록 중 오류 발생\n{str(e)}")
+        return False
+
+def api_success_check_api(responce) :
+    # API 요청이 성공인지 실패인지 결과를 반환하는 함수
     try :
         # responce의 결과값이 딕셔너리 형태로 대입됨
         responce_data = responce.json()

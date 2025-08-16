@@ -5,6 +5,7 @@ from PyQt5.QtCore import QTimer, QTime
 from PyQt5.QtCore import QDateTime, Qt
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QKeyEvent
+from Fingerprint_api import register_fingerprint_api
 import requests
 import json
 
@@ -49,9 +50,6 @@ class FingerprintUI(QMainWindow):
         
         # 메인화면 복귀 코드
         self.back_main_button.clicked.connect(self.on_back_main_clicked)
-
-        # 목 데이터 테스트 버튼 함수
-        self.mock_test_button.clicked.connect(self.process_fingerprint_action)
 
         # 코파일럿 수정 버전 학번 입력 버튼 딕셔너리화
         digit_buttons = {
@@ -118,39 +116,8 @@ class FingerprintUI(QMainWindow):
     # 엔터 버튼 함수
     def on_enter_button_clicked(self):
         student_id = self.student_id
-        use_mock = False
-
-        self.worker = FingerprintWorker(
-            student_id=student_id,
-            action=self.current_action,
-            is_close=(self.current_action == "문닫기"),
-            use_mock=use_mock
-        )
-        self.worker.finished.connect(self.on_worker_finished)
-        self.worker.start()
-        self.threads.append(self.worker)
-    
-    def process_fingerprint_action(self):
-        if self.current_action == "등록":
-            return  # 등록은 기존 엔터 버튼 사용
-
-        self.worker = FingerprintWorker(
-            action=self.current_action,
-            is_close=(self.current_action == "문닫기"),
-            use_mock=True
-        )
-        self.worker.finished.connect(self.on_worker_finished)
-        self.worker.start()
-        self.threads.append(self.worker)
-    
-    # 서버 응답 결과 
-    def on_worker_finished(self, result):
-        if self.current_action == "등록":
-            self.registration_msg_label.setText(result)
-        else:
-            self.fingerprint_msg_label.setText(result)
         
-    
+
 
 # 서버 요청 담당 클래스
 class FingerprintWorker(QThread):
