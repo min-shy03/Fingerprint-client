@@ -37,7 +37,6 @@ class FingerprintUI(QMainWindow):
         # 외출 사유 실행 코드
         self.eating_button.clicked.connect(lambda: self.on_action_selected("식사", self.page_fingerprint))
         self.gs25_button.clicked.connect(lambda: self.on_action_selected("편의점", self.page_fingerprint))
-        self.gym_button.clicked.connect(lambda: self.on_action_selected("운동", self.page_fingerprint))
         self.etc_button.clicked.connect(lambda: self.on_action_selected("기타", self.page_fingerprint))
         
         # 마지막 인원 체크 버튼 클릭 후 실행 코드
@@ -84,7 +83,6 @@ class FingerprintUI(QMainWindow):
     # 메인 화면으로 돌아가기 버튼 함수
     def on_back_main_clicked(self) :
         self.stackedWidget.setCurrentWidget(self.page_main)
-        
         self.fingerprint_msg_label.setText("지문을 입력하세요")
         
     # 지문 등록 버튼 함수

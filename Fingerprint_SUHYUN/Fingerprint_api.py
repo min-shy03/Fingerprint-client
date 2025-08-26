@@ -49,6 +49,15 @@ def get_all_fingerprint_api() :
         api_message.message.emit(f"지문 정보 조회 중 오류 발생\n{str(e)}")
         return []
     
+def check_student_registration(student_id) :
+    # 가입 가능한 학번인지 검증
+    try :
+        responce = requests.get(f"{SERVER_URL}/students/{student_id}")
+        return api_success_check_api(responce)
+    except Exception as e :
+        api_message.message.emit(f"학번 검증 중 오류 발생\n{str(e)}")
+        return False
+
 def register_fingerprint_api(fp_data1, fp_data2, std_num, salt) :
     # 지문 등록 api 호출
     try :

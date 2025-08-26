@@ -2,11 +2,13 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
-import base64
 from PyQt5.QtCore import QThread, pyqtSignal
+from Fingerprint_api import get_all_fingerprint_api, check_student_registration
+from Fingerprint_status import Status, get_student_id
 import os
 import sys
-from Fingerprint_api import get_all_fingerprint_api
+import base64
+import time
 
 class FingerprintSensor(QThread) :
     message = pyqtSignal(str)
@@ -43,8 +45,17 @@ class FingerprintSensor(QThread) :
 
     def register_fingerprint(self) :
         # 지문 등록 함수
-        self.message.emit("테스트")
+        student_id = get_student_id()
 
+        # 등록 가능한 학생이 아니면 등록 종료
+        if not check_student_registration(student_id) :
+            return
+        
+        start_time = time.time()
+
+        # 5초간 진행
+        while time.time() - start_time < 5 :
+            if self.sensor.readImage()
     
     def generate_key(self, password, salt):
         # 암호화 전용 키 생성 함수
