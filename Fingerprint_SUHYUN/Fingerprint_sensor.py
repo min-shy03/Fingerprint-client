@@ -63,7 +63,7 @@ class FingerprintSensor(QThread) :
             if current_status == Status.REGISTER :
                 return self.register_fingerprint()
             else :
-                return self.verify_fingerprint()
+                return self.verify_fingerprint(current_status)
             
         except Exception as e :
             self.message.emit(f"지문 스캔 중 오류 발생\n{str(e)}")
@@ -139,7 +139,7 @@ class FingerprintSensor(QThread) :
     def encrypt(self, data, key) :
         # 암호화 함수
         iv = os.urandom(16)
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+        cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
         encryptor = cipher.encryptor()
         encrypted_data = encryptor.update(data) + encryptor.finalize()
         return iv + encrypted_data

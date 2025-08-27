@@ -153,8 +153,3 @@ class FingerprintUI(QMainWindow):
 
         # ✨ 엔터 키를 누르는 순간, 'REGISTER' 상태로 변경하라고 신호를 보냅니다.
         set_status(Status.REGISTER)
-        
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = FingerprintUI()
-    sys.exit(app.exec_())
