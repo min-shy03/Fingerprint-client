@@ -96,12 +96,8 @@ class FingerprintUI(QMainWindow):
         set_status(status)  # 어떤 버튼이 눌렸든 먼저 상태부터 설정합니다.
         print(f"상태 변경: {get_status()}") # 정상 동작하는지 확인용
 
-        # 상태에 따라 페이지를 전환하고 필요한 작업을 수행합니다.
-        if status == Status.REGISTER:
-            self.stackedWidget.setCurrentWidget(self.page_registration)
-            self.registration_msg_label.setText(get_student_id())
-            
-        elif status == Status.LEAVE:
+        # 상태에 따라 페이지를 전환하고 필요한 작업을 수행합니다.    
+        if status == Status.LEAVE:
             # '예/아니오' 페이지가 아닐 때만 last_member 페이지로 이동합니다.
             if self.stackedWidget.currentWidget() != self.page_last_member:
                 self.stackedWidget.setCurrentWidget(self.page_last_member)
