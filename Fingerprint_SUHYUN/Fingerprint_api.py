@@ -2,6 +2,7 @@ import requests
 import os
 import sys
 from PyQt5.QtCore import QObject, pyqtSignal
+from Fingerprint_status import Status
 
 # 테스트용 전역 변수 (실사용 시 환경 변수에 저장)
 SERVER_URL = "http://210.101.236.158:8081/api/fingerprint"
@@ -75,6 +76,35 @@ def register_fingerprint_api(fp_data1, fp_data2, std_num, salt) :
         api_message.message.emit(f"지문 등록 중 오류 발생\n{str(e)}")
         return False
 
+def log_status(std_num, status) :
+    try :
+        data_json = {
+            "std_num" : std_num,
+            "action" : status.value
+        }
+        
+        responce = requests.post(f"{SERVER_URL}/logs", data_json)
+
+        return api_success_check_api(responce)
+    
+    except Exception as e :
+        api_message.message.emit(f"로그 기록 중 오류 발생\n{str(e)}")
+        return False
+
+def close_door(std_num) :
+    # 문 닫기 API
+    try :
+        data_json = {
+            "closingMember" : std_num
+        }
+
+        responce = requests.post(f"{SERVER_URL}/close", data_json)
+
+        return api_success_check_api(responce)
+    except Exception as e :
+        api_message.message.emit(f"문 닫기 중 오류 발생\n{str(e)}")
+        return False
+    
 def api_success_check_api(responce) :
     # API 요청이 성공인지 실패인지 결과를 반환하는 함수
     try :

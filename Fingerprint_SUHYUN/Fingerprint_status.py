@@ -1,8 +1,8 @@
-import enum
+from enum import Enum
 
 # 열거 타입
-class Status(enum) :
-    WATTING = "대기"
+class Status(Enum) :
+    WAITING = "대기"
     REGISTER = "등록"
     ATTENDANCE = "등교"
     LEAVE = "하교"
@@ -12,7 +12,7 @@ class Status(enum) :
     RETURN = "복귀"
     CLOSE = "문닫기"
 
-status = Status.WATTING     # 기본 상태 대기
+status = Status.WAITING     # 기본 상태 대기
 sensor_active = False       # 지문 인식기 활성화 상태
 student_id = ""             # 현재 입력된 학번
 
@@ -29,8 +29,13 @@ def set_status(new_status : Status) -> None :
     global status
     status = new_status
 
-    if new_status == Status.WATTING :
-        pass
+    if new_status == Status.WAITING :
+        set_sensor_active(False)
+    elif new_status == Status.REGISTER :
+        set_sensor_active(True)
+    else :
+        set_sensor_active(True)
+        clear_student_id()
         
 def is_sensor_active() -> bool :
     # 센서가 활성화 상태인지 반환하는 함수

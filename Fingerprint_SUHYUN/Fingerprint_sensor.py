@@ -3,12 +3,14 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from PyQt5.QtCore import QThread, pyqtSignal
-from Fingerprint_api import get_all_fingerprint_api, check_student_registration
-from Fingerprint_status import Status, get_student_id
+from Fingerprint_api import get_all_fingerprint_api, check_student_registration, register_fingerprint_api, close_door, log_status
+from Fingerprint_status import Status, get_student_id, get_status, is_sensor_active
 import os
 import sys
 import base64
 import time
+
+MATCH_THRESHOLD = 50
 
 class FingerprintSensor(QThread) :
     message = pyqtSignal(str)
@@ -43,6 +45,29 @@ class FingerprintSensor(QThread) :
             # 코드가 비정상적으로 끝났음을 알려주는 1 표시
             sys.exit(1)
 
+    def run(self) :
+        while self.running :
+
+            self.scan_fingerprint()
+
+    def scan_fingerprint(self) :
+        # 지문이 스캔 될 때까지 기다리는 함수
+
+        try :
+            # 센서가 비활성화 상태면 None 반환
+            if not is_sensor_active() :
+                return
+            
+            current_status = get_status()
+
+            if current_status == Status.REGISTER :
+                return self.register_fingerprint()
+            else :
+                return self.verify_fingerprint()
+            
+        except Exception as e :
+            self.message.emit(f"지문 스캔 중 오류 발생\n{str(e)}")
+
     def register_fingerprint(self) :
         # 지문 등록 함수
         student_id = get_student_id()
@@ -55,8 +80,51 @@ class FingerprintSensor(QThread) :
 
         # 5초간 진행
         while time.time() - start_time < 5 :
-            if self.sensor.readImage()
+            if self.sensor.readImage() != False :
+                self.sensor.convertImage(0x01)
+                break
+
+        self.message.emit("첫 번째 지문이 등록되었습니다. \n 두 번째 지문을 스캔해주세요.")
+        start_time = time.time()
+
+        while time.time() - start_time < 5 :
+            if self.sensor.readImage() != False :
+                self.sensor.convertImage(0x02)
+                break
+
+        if self.sensor.compareCharacteristics() == 0 :
+            self.message.emit("등록한 지문이 일치하지 않습니다.")
+            return None
+        
+        raw_salt = os.urandom(16)
+        key = self.generate_key(self.PASSWORD, raw_salt)
+
+        fp_data1 = self.encode_and_encrypt(0x01, key)
+        fp_data2 = self.encode_and_encrypt(0x02, key)
+        salt = base64.b64encode(raw_salt).decode("utf-8")
+
+        # API 호출
+        if register_fingerprint_api(fp_data1, fp_data2, student_id, salt) :
+            self.create_and_store_template(student_id)
     
+    def verify_fingerprint(self, current_status) :
+        # 지문 검증 처리
+        if self.sensor.readImage() != False :
+            self.sensor.convertImage(0x01)
+            result = self.sensor.searchTemplate()
+
+
+            if result[0] >= 0 and result[1] >= MATCH_THRESHOLD :
+                # 일치하는 지문 찾았을 때
+                student_id = self.STUDENT_LIST[result[0]]
+
+                if current_status == Status.CLOSE :
+                    # 문 닫기 API 호출
+                    close_door(student_id)
+                    return
+                
+                log_status(student_id, current_status)
+
     def generate_key(self, password, salt):
         # 암호화 전용 키 생성 함수
         kdf = PBKDF2HMAC(
