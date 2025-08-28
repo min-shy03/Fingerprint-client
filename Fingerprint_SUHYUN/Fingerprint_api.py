@@ -54,10 +54,9 @@ def check_student_registration(student_id) :
     # 가입 가능한 학번인지 검증
     print("체크 스튜던트 레지스트리")
     try :
-        print(f"{SERVER_URL}/students/{student_id}")
         responce = requests.get(f"{SERVER_URL}/students/{student_id}")
 
-        
+        print(responce.json())
         return api_success_check_api(responce)
     except Exception as e :
         api_message.message.emit(f"학번 검증 중 오류 발생\n{str(e)}")
