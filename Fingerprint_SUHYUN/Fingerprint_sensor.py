@@ -69,15 +69,16 @@ class FingerprintSensor(QThread) :
 
     def register_fingerprint(self) :
         # 지문 등록 함수
-        
+
         student_id = get_student_id()
-    
+
         # 등록 가능한 학생인지 서버에 확인
         if not check_student_registration(student_id) :
             # 실패 시 상태를 WAITING으로 되돌리고 종료
             set_status(Status.WAITING)
+            clear_student_id()
             return
-    
+
         # --- 첫 번째 지문 스캔 ---
         self.message.emit("첫 번째 지문을 스캔해주세요.")
         start_time = time.time()
@@ -91,8 +92,9 @@ class FingerprintSensor(QThread) :
         if not finger_detected:
             self.message.emit("시간 초과. 등록을 취소합니다.")
             set_status(Status.WAITING) # 상태 되돌리기
+            clear_student_id()
             return
-    
+
         # --- 두 번째 지문 스캔 ---
         self.message.emit("두 번째 지문을 스캔해주세요.")
         start_time = time.time()
@@ -102,16 +104,18 @@ class FingerprintSensor(QThread) :
                 self.sensor.convertImage(0x02)
                 finger_detected = True
                 break
-            
+
         if not finger_detected:
             self.message.emit("시간 초과. 등록을 취소합니다.")
             set_status(Status.WAITING) # 상태 되돌리기
+            clear_student_id()
             return
-    
+
         # --- 지문 비교 및 서버 전송 ---
         if self.sensor.compareCharacteristics() == 0:
             self.message.emit("지문이 일치하지 않습니다.")
             set_status(Status.WAITING) # 상태 되돌리기
+            clear_student_id()
             return
         
         raw_salt = os.urandom(16)
