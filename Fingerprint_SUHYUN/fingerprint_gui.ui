@@ -28,7 +28,7 @@
 </string>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="page_main">
      <widget class="QLabel" name="main_msg_label">
@@ -485,7 +485,7 @@ border-radius: 15px;</string>
       <property name="font">
        <font>
         <family>AppleSDGothicNeoB00</family>
-        <pointsize>30</pointsize>
+        <pointsize>24</pointsize>
        </font>
       </property>
       <property name="styleSheet">
@@ -894,7 +894,7 @@ border: 1px solid white;</string>
       <property name="font">
        <font>
         <family>AppleSDGothicNeoB00</family>
-        <pointsize>30</pointsize>
+        <pointsize>24</pointsize>
        </font>
       </property>
       <property name="styleSheet">
