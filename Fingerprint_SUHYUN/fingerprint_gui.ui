@@ -882,7 +882,7 @@ border: 1px solid white;</string>
        </item>
       </layout>
      </widget>
-     <widget class="QLineEdit" name="registration_msg_label">
+     <widget class="QLabel" name="registration_msg_label">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -890,6 +890,12 @@ border: 1px solid white;</string>
         <width>811</width>
         <height>130</height>
        </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
       <property name="font">
        <font>
