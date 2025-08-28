@@ -69,33 +69,50 @@ class FingerprintSensor(QThread) :
 
     def register_fingerprint(self) :
         # 지문 등록 함수
-        student_id = get_student_id()
-
-        # 등록 가능한 학생이 아니면 등록 종료
-        if not check_student_registration(student_id) :
-            set_status(Status.WAITING)
-            clear_student_id()
-            return
         
+        student_id = get_student_id()
+    
+        # 등록 가능한 학생인지 서버에 확인
+        if not check_student_registration(student_id) :
+            # 실패 시 상태를 WAITING으로 되돌리고 종료
+            set_status(Status.WAITING)
+            return
+    
+        # --- 첫 번째 지문 스캔 ---
+        self.message.emit("첫 번째 지문을 스캔해주세요.")
         start_time = time.time()
-
-        # 5초간 진행
-        while time.time() - start_time < 5 :
-            if self.sensor.readImage() != False :
+        finger_detected = False
+        while time.time() - start_time < 5:  # 5초 제한
+            if self.sensor.readImage():
                 self.sensor.convertImage(0x01)
+                finger_detected = True
                 break
-
-        self.message.emit("첫 번째 지문이 등록되었습니다. \n 두 번째 지문을 스캔해주세요.")
+            
+        if not finger_detected:
+            self.message.emit("시간 초과. 등록을 취소합니다.")
+            set_status(Status.WAITING) # 상태 되돌리기
+            return
+    
+        # --- 두 번째 지문 스캔 ---
+        self.message.emit("두 번째 지문을 스캔해주세요.")
         start_time = time.time()
-
-        while time.time() - start_time < 5 :
-            if self.sensor.readImage() != False :
+        finger_detected = False
+        while time.time() - start_time < 5: # 5초 제한
+            if self.sensor.readImage():
                 self.sensor.convertImage(0x02)
+                finger_detected = True
                 break
-
-        if self.sensor.compareCharacteristics() == 0 :
-            self.message.emit("등록한 지문이 일치하지 않습니다.")
-            return None
+            
+        if not finger_detected:
+            self.message.emit("시간 초과. 등록을 취소합니다.")
+            set_status(Status.WAITING) # 상태 되돌리기
+            return
+    
+        # --- 지문 비교 및 서버 전송 ---
+        if self.sensor.compareCharacteristics() == 0:
+            self.message.emit("지문이 일치하지 않습니다.")
+            set_status(Status.WAITING) # 상태 되돌리기
+            return
         
         raw_salt = os.urandom(16)
         key = self.generate_key(self.PASSWORD, raw_salt)
