@@ -85,7 +85,7 @@ class FingerprintSensor(QThread) :
         self.message.emit("첫 번째 지문을 스캔해주세요.")
         start_time = time.time()
         finger_detected = False
-        while time.time() - start_time < 5:  # 5초 제한
+        while time.time() - start_time < 10:  # 10초 제한
             if self.sensor.readImage():
                 self.sensor.convertImage(0x01)
                 finger_detected = True
@@ -101,7 +101,7 @@ class FingerprintSensor(QThread) :
         self.message.emit("두 번째 지문을 스캔해주세요.")
         start_time = time.time()
         finger_detected = False
-        while time.time() - start_time < 5: # 5초 제한
+        while time.time() - start_time < 10: # 10초 제한
             if self.sensor.readImage():
                 self.sensor.convertImage(0x02)
                 finger_detected = True
@@ -130,6 +130,8 @@ class FingerprintSensor(QThread) :
         # API 호출
         if register_fingerprint_api(fp_data1, fp_data2, student_id, salt) :
             self.create_and_store_template(student_id)
+
+        set_status(Status.WAITING)
     
     def verify_fingerprint(self, current_status) :
         # 지문 검증 처리
