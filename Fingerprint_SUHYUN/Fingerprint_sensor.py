@@ -131,6 +131,7 @@ class FingerprintSensor(QThread) :
         if register_fingerprint_api(fp_data1, fp_data2, student_id, salt) :
             self.create_and_store_template(student_id)
 
+        # 등록이 끝나면 대기 상태로
         set_status(Status.WAITING)
     
     def verify_fingerprint(self, current_status) :
