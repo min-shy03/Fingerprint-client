@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from PyQt5.QtCore import QThread, pyqtSignal
 from Fingerprint_api import get_all_fingerprint_api, check_student_registration, register_fingerprint_api, close_door, log_status
-from Fingerprint_status import Status, get_student_id, get_status, is_sensor_active
+from Fingerprint_status import Status, get_student_id, get_status, is_sensor_active, set_status
 import os
 import sys
 import base64
@@ -47,7 +47,6 @@ class FingerprintSensor(QThread) :
 
     def run(self) :
         while self.running :
-
             self.scan_fingerprint()
 
     def scan_fingerprint(self) :
@@ -74,6 +73,8 @@ class FingerprintSensor(QThread) :
 
         # 등록 가능한 학생이 아니면 등록 종료
         if not check_student_registration(student_id) :
+            self.message.emit("등록할 수 없는 학번입니다.")
+            set_status(Status.WAITING)
             return
         
         start_time = time.time()
