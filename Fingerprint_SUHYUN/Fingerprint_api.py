@@ -70,7 +70,7 @@ def register_fingerprint_api(fp_data1, fp_data2, std_num, salt) :
             "salt" : salt
         }
 
-        responce = requests.post(f"{SERVER_URL}/students", data=data_json)
+        responce = requests.post(f"{SERVER_URL}/students", json=data_json)
 
         return api_success_check_api(responce)
     except Exception as e :
@@ -84,7 +84,7 @@ def log_status(std_num, status) :
             "action" : status.value
         }
         
-        responce = requests.post(f"{SERVER_URL}/logs", data_json)
+        responce = requests.post(f"{SERVER_URL}/logs", json=data_json)
 
         return api_success_check_api(responce)
     
@@ -99,7 +99,7 @@ def close_door(std_num) :
             "closingMember" : std_num
         }
 
-        responce = requests.post(f"{SERVER_URL}/close", data_json)
+        responce = requests.post(f"{SERVER_URL}/close", json=data_json)
 
         return api_success_check_api(responce)
     except Exception as e :
