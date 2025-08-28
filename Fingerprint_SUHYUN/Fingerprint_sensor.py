@@ -73,7 +73,6 @@ class FingerprintSensor(QThread) :
 
         # 등록 가능한 학생이 아니면 등록 종료
         if not check_student_registration(student_id) :
-            self.message.emit("등록할 수 없는 학번입니다.")
             set_status(Status.WAITING)
             clear_student_id()
             return
