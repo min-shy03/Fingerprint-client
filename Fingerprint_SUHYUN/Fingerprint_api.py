@@ -108,12 +108,13 @@ def close_door(std_num) :
     
 def api_success_check_api(responce) :
     # API 요청이 성공인지 실패인지 결과를 반환하는 함수
+    responce_data = responce.json()
+
+    print(responce_data["success"])
+    print(type(responce_data["success"]))
     try :
         # responce의 결과값이 딕셔너리 형태로 대입됨
-        responce_data = responce.json()
-
-        print(responce_data["success"])
-        print(type(responce_data["success"]))
+        
 
         # 서버에 요청 성공 시
         if responce.status_code == 200 or responce.status_code == 400 :
