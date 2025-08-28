@@ -882,7 +882,7 @@ border: 1px solid white;</string>
        </item>
       </layout>
      </widget>
-     <widget class="QLabel" name="registration_msg_label">
+     <widget class="QLineEdit" name="registration_msg_label">
       <property name="geometry">
        <rect>
         <x>0</x>
