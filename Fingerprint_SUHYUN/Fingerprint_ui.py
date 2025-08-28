@@ -111,6 +111,7 @@ class FingerprintUI(QMainWindow):
     def on_back_main_clicked(self) :
         self.stackedWidget.setCurrentWidget(self.page_main)
         self.fingerprint_msg_label.setText("지문을 입력하세요")
+        set_status(Status.WAITING)
 
     def go_to_registration_page(self):
         # 등록 페이지로 이동하고, 학번을 초기화하며, 센서는 끈 상태를 유지합니다.
