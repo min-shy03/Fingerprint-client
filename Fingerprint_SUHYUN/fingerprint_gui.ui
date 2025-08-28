@@ -882,7 +882,7 @@ border: 1px solid white;</string>
        </item>
       </layout>
      </widget>
-     <widget class="QLineEdit" name="registration_msg_label">
+     <widget class="QLabel" name="registration_msg_label">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -891,17 +891,23 @@ border: 1px solid white;</string>
         <height>130</height>
        </rect>
       </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <property name="font">
        <font>
         <family>AppleSDGothicNeoB00</family>
         <pointsize>24</pointsize>
        </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>IBeamCursor</cursorShape>
+      </property>
+      <property name="mouseTracking">
+       <bool>true</bool>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: rgb(30, 34, 40);
@@ -911,16 +917,13 @@ QLineEdit {color: white;}
 QLineEdit:placeholder {color: white;}</string>
       </property>
       <property name="text">
-       <string/>
+       <string>TextLabel</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
-      <property name="dragEnabled">
-       <bool>false</bool>
-      </property>
-      <property name="placeholderText">
-       <string>학번을 입력하세요</string>
+      <property name="wordWrap">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>

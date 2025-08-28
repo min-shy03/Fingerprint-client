@@ -119,8 +119,8 @@ class FingerprintUI(QMainWindow):
         # 등록 페이지로 이동하고, 학번을 초기화하며, 센서는 끈 상태를 유지합니다.
         self.stackedWidget.setCurrentWidget(self.page_registration)
         clear_student_id()
-        self.registration_msg_label.setText(get_student_id()) # 빈 학번으로 라벨 업데이트
-        set_sensor_active(False) # 페이지 이동 시에는 센서를 확실히 끈다.
+        self.registration_msg_label.setText("학번을 입력하세요")
+        set_sensor_active(False)
 
     # 각 숫자 버튼 클릭 함수
     def on_digit_button_clicked(self, digit) :
@@ -137,8 +137,14 @@ class FingerprintUI(QMainWindow):
         current_id = get_student_id()
         updated_id = current_id[:-1]
         set_student_id(updated_id)
-        # 화면 라벨에도 최신 학번을 표시합니다.
-        self.registration_msg_label.setText(get_student_id())
+        new_id = get_student_id()
+        # ✨ 만약 학번을 다 지워서 빈 문자열이 되었다면,
+        if not new_id:
+            # 안내 문구를 다시 표시합니다.
+            self.registration_msg_label.setText("학번을 입력하세요")
+        else:
+            # 아직 글자가 남아있다면, 줄어든 학번을 표시합니다.
+            self.registration_msg_label.setText(new_id)
 
     def on_enter_button_clicked(self):
         # 엔터 버튼: 학번 입력을 완료하고 'REGISTER' 상태로 전환하여 스캔을 시작합니다.
