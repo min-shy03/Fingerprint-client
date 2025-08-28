@@ -111,11 +111,12 @@ def api_success_check_api(responce) :
         # responce의 결과값이 딕셔너리 형태로 대입됨
         responce_data = responce.json()
 
+        print(responce_data["success"])
+        print(type(responce_data["success"]))
+        
         # 서버에 요청 성공 시
         if responce.status_code == 200 or responce.status_code == 400 :
             api_message.message.emit(responce_data["message"])
-            print(responce_data["success"])
-            print(type(responce_data["success"]))
             return responce_data["success"]
         elif responce.status_code == 404 :
             api_message.message.emit("404, 엔드포인트를 찾을 수 없습니다.")
