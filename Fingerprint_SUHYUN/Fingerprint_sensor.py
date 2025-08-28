@@ -44,6 +44,8 @@ class FingerprintSensor(QThread) :
             print("지문 인식기 연결 실패 :", e)
             # 코드가 비정상적으로 끝났음을 알려주는 1 표시
             sys.exit(1)
+        
+        self.get_fingerprint_list()
 
     def run(self) :
         while self.running :
@@ -117,9 +119,6 @@ class FingerprintSensor(QThread) :
             set_status(Status.WAITING) # 상태 되돌리기
             clear_student_id()
             return
-        
-        # 테스트용 끝나면 지워도 됨
-        print("지문 등록 완료")
 
         raw_salt = os.urandom(16)
         key = self.generate_key(self.PASSWORD, raw_salt)
@@ -130,8 +129,6 @@ class FingerprintSensor(QThread) :
 
         # API 호출
         if register_fingerprint_api(fp_data1, fp_data2, student_id, salt) :
-            # 테스트용 끝나면 지워도 됨
-            print("지문 등록 api 호출 완료")
             self.create_and_store_template(student_id)
     
     def verify_fingerprint(self, current_status) :
