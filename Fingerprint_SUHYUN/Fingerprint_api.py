@@ -54,6 +54,7 @@ def check_student_registration(student_id) :
     # 가입 가능한 학번인지 검증
     try :
         responce = requests.get(f"{SERVER_URL}/students/{student_id}")
+
         return api_success_check_api(responce)
     except Exception as e :
         api_message.message.emit(f"학번 검증 중 오류 발생\n{str(e)}")
@@ -111,8 +112,8 @@ def api_success_check_api(responce) :
         # responce의 결과값이 딕셔너리 형태로 대입됨
         responce_data = responce.json()
 
-        # print(responce_data["success"])
-        # print(type(responce_data["success"]))
+        print(responce_data["success"])
+        print(type(responce_data["success"]))
         # 서버에 요청 성공 시
         if responce.status_code == 200 or responce.status_code == 400 :
             api_message.message.emit(responce_data["message"])
