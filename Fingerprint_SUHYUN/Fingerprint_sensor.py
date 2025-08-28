@@ -118,6 +118,9 @@ class FingerprintSensor(QThread) :
             clear_student_id()
             return
         
+        # 테스트용 끝나면 지워도 됨
+        print("지문 등록 완료")
+
         raw_salt = os.urandom(16)
         key = self.generate_key(self.PASSWORD, raw_salt)
 
@@ -127,6 +130,8 @@ class FingerprintSensor(QThread) :
 
         # API 호출
         if register_fingerprint_api(fp_data1, fp_data2, student_id, salt) :
+            # 테스트용 끝나면 지워도 됨
+            print("지문 등록 api 호출 완료")
             self.create_and_store_template(student_id)
     
     def verify_fingerprint(self, current_status) :
