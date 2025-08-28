@@ -75,7 +75,9 @@ class FingerprintUI(QMainWindow):
         self.registration_msg_label.setText(msg)
 
         # 3초 후에 메시지를 다시 기본 상태로 되돌리는 타이머
-        QTimer.singleShot(3000, self.clear_all_messages)
+        current_status = get_status()
+        if current_status != Status.REGISTER:
+            QTimer.singleShot(3000, self.clear_all_messages)
 
     def clear_all_messages(self):
         # 모든 메시지 라벨을 기본 텍스트로 초기화
