@@ -112,8 +112,7 @@ def api_success_check_api(responce) :
         # responce의 결과값이 딕셔너리 형태로 대입됨
         responce_data = responce.json()
 
-        print(responce_data["success"])
-        print(type(responce_data["success"]))
+        print(responce_data)
         # 서버에 요청 성공 시
         if responce.status_code == 200 or responce.status_code == 400 :
             api_message.message.emit(responce_data["message"])
