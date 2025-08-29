@@ -151,6 +151,9 @@ class FingerprintSensor(QThread) :
                     return
                 
                 log_status(student_id, current_status)
+            else:
+            # 일치하는 지문을 찾지 못했을 때 메시지를 추가
+                self.message.emit("일치하는 지문이 없습니다.")
 
     def generate_key(self, password, salt):
         # 암호화 전용 키 생성 함수
