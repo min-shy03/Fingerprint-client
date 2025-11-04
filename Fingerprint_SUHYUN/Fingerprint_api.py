@@ -43,7 +43,7 @@ def get_all_fingerprint_api() :
             return responce.json()["data"]
         else :
             return []
-    except requests.exceptions as e :
+    except requests.exceptions.RequestException as e :
         api_message.message.emit(f"요청 과정 중 오류 발생\n{str(e)}")
         return []
     except Exception as e :
